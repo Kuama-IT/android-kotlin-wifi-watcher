@@ -19,6 +19,16 @@ override fun onPause() {
 }
 ```
 
+### Do I need a context?
+Sadly yes, to bootstrap the library you will need a valid context:
+
+```kotlin
+WiFiSpy.with(this) // this is a context (eg. activity)
+```
+
+### Can I subscribe multiple times?
+Yes, the `info` object is a `ConnectableObservable`
+
 ### Which states could I get?
 
 #### `CONNECTED`
