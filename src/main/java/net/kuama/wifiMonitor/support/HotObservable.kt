@@ -5,7 +5,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
-class HotObservable<T>(anyValue1: T) {
+internal class HotObservable<T>(anyValue1: T) {
 
     lateinit var emitter: ValueObserver<T>
 

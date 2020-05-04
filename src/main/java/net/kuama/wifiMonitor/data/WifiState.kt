@@ -1,6 +1,6 @@
 package net.kuama.wifiSpy.data
 
-enum class WiFiState {
+enum class WifiState {
     /**
      * if wiFi is connected
      * you'll get this state with the current wiFi's ssid inside a WiFiInfo object

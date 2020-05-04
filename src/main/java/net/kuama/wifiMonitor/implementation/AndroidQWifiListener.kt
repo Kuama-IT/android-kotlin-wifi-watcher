@@ -6,17 +6,17 @@ import android.net.ConnectivityManager
 import android.net.Network
 import android.net.NetworkCapabilities
 import android.os.Build
-import net.kuama.wifiSpy.WiFiListener
+import net.kuama.wifiSpy.WifiListener
 
 /**
- * From Android Q on, most of the WiFi-related classes and functionalities have been deprecated
+ * From Android Q on, most of the WiFi-related classes and properties have been deprecated
  * https://developer.android.com/about/versions/10/behavior-changes-10
  *
  * From now on, to observe connectivity changes we should register a
  * [ConnectivityManager.NetworkCallback] implementation
  */
 @TargetApi(Build.VERSION_CODES.N)
-internal class AndroidQ(context: Context) : WiFiListener {
+internal class AndroidQWifiListener(context: Context) : WifiListener {
 
     /**
      * Callback to propagate the "wifi state changed" action
@@ -28,7 +28,7 @@ internal class AndroidQ(context: Context) : WiFiListener {
      */
     private val startImplementation = {
         (context.applicationContext.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager)
-            .registerDefaultNetworkCallback(networkCallback)
+                .registerDefaultNetworkCallback(networkCallback)
     }
 
     /**
@@ -36,7 +36,7 @@ internal class AndroidQ(context: Context) : WiFiListener {
      */
     private val stopImplementation = {
         (context.applicationContext.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager)
-            .unregisterNetworkCallback(networkCallback)
+                .unregisterNetworkCallback(networkCallback)
     }
 
     /**
@@ -44,11 +44,11 @@ internal class AndroidQ(context: Context) : WiFiListener {
      * will invoke the onChange on each onCapabilitiesChanged
      */
     private val networkCallback = object :
-        ConnectivityManager.NetworkCallback() {
+            ConnectivityManager.NetworkCallback() {
 
         override fun onCapabilitiesChanged(
-            network: Network,
-            networkCapabilities: NetworkCapabilities
+                network: Network,
+                networkCapabilities: NetworkCapabilities
         ) {
             super.onCapabilitiesChanged(network, networkCapabilities)
             onChange?.invoke()

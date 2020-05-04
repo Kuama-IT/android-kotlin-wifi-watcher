@@ -4,13 +4,13 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import net.kuama.wifiSpy.WiFiListener
+import net.kuama.wifiSpy.WifiListener
 
 /**
  * Before Android Q we can register a receiver to obser wifi state changes,
  * and this class does just that.
  */
-internal class BeforeAndroidQ(context: Context) : WiFiListener {
+internal class BeforeAndroidQWifiListener(context: Context) : WifiListener {
 
     /**
      * Callback to propagate the "wifi state changed" action
