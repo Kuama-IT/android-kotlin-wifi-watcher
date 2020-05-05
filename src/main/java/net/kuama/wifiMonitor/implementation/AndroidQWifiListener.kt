@@ -1,4 +1,4 @@
-package net.kuama.wifiSpy.implementation
+package net.kuama.wifiMonitor.implementation
 
 import android.annotation.TargetApi
 import android.content.Context
@@ -6,7 +6,7 @@ import android.net.ConnectivityManager
 import android.net.Network
 import android.net.NetworkCapabilities
 import android.os.Build
-import net.kuama.wifiSpy.WifiListener
+import net.kuama.wifiMonitor.WifiListener
 
 /**
  * From Android Q on, most of the WiFi-related classes and properties have been deprecated

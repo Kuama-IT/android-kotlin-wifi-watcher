@@ -1,2 +1,1 @@
-include ':kWiFiSpy'
-rootProject.name='WiFi Spy'
+rootProject.name='WiFiSpy'

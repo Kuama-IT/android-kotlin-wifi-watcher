@@ -1,10 +1,10 @@
-package net.kuama.wifiSpy.implementation
+package net.kuama.wifiMonitor.implementation
 
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import net.kuama.wifiSpy.WifiListener
+import net.kuama.wifiMonitor.WifiListener
 
 /**
  * Before Android Q we can register a receiver to obser wifi state changes,

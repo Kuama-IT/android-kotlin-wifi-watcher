@@ -1,4 +1,4 @@
-package net.kuama.wifiSpy
+package net.kuama.wifiMonitor
 
 import android.Manifest
 import android.content.Context
@@ -11,15 +11,27 @@ import io.reactivex.Observable
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
-import net.kuama.wifiSpy.data.WiFiInfo
-import net.kuama.wifiSpy.data.WifiState
-import net.kuama.wifiSpy.data.WifiNetworkBand
-import net.kuama.wifiSpy.implementation.AndroidQWifiListener
-import net.kuama.wifiSpy.implementation.BeforeAndroidQWifiListener
-import net.kuama.wifiSpy.support.HotObservable
-import net.kuama.wifiSpy.support.SingletonHolder
+import net.kuama.wifiMonitor.data.WiFiInfo
+import net.kuama.wifiMonitor.data.WifiState
+import net.kuama.wifiMonitor.data.WifiNetworkBand
+import net.kuama.wifiMonitor.implementation.AndroidQWifiListener
+import net.kuama.wifiMonitor.implementation.BeforeAndroidQWifiListener
+import net.kuama.wifiMonitor.support.HotObservable
+import net.kuama.wifiMonitor.support.SingletonHolder
 
-class WiFiSpy private constructor(context: Context) {
+class WifiMonitor private constructor(context: Context) {
+
+    class Builder {
+        private var context: Context? = null
+        fun context(context: Context) = apply {
+            this.context = context
+        }
+
+        fun build(): WifiMonitor {
+            val ctx = context ?: error("please provide a context")
+            return WifiMonitor(ctx)
+        }
+    }
 
     private var listenWifiChangesAsync: Deferred<Unit>? = null
 
@@ -40,7 +52,7 @@ class WiFiSpy private constructor(context: Context) {
             Manifest.permission.ACCESS_FINE_LOCATION
     ) == PERMISSION_GRANTED
 
-    companion object : SingletonHolder<WiFiSpy, Context>(::WiFiSpy)
+    companion object : SingletonHolder<WifiMonitor, Context>(::WifiMonitor)
 
     private var subscribersCount = 0
 
@@ -116,11 +128,13 @@ class WiFiSpy private constructor(context: Context) {
             WifiNetworkBand.UNKNOWN
         }
 
+
         innerInfo?.current = WiFiInfo(
                 state = if (isFineLocationAccessGranted) WifiState.CONNECTED else WifiState.CONNECTED_MISSING_FINE_LOCATION_PERMISSION,
                 ssid = connectionInfo.ssid,
                 bssid = connectionInfo.bssid,
-                band = band
+                band = band,
+                rssi = connectionInfo.rssi
         )
     }
 

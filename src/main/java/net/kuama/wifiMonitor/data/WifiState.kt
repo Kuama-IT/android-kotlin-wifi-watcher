@@ -1,4 +1,4 @@
-package net.kuama.wifiSpy.data
+package net.kuama.wifiMonitor.data
 
 enum class WifiState {
     /**

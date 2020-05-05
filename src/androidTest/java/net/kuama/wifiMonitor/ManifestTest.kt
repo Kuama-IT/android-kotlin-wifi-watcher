@@ -1,4 +1,4 @@
-package net.kuama.wifiSpy
+package net.kuama.wifiMonitor
 
 import android.Manifest
 import android.content.pm.PackageManager

@@ -1,4 +1,4 @@
-package net.kuama.wifiSpy.support
+package net.kuama.wifiMonitor.support
 
 open class SingletonHolder<out T : Any, in A>(creator: (A) -> T) {
     private var creator: ((A) -> T)? = creator

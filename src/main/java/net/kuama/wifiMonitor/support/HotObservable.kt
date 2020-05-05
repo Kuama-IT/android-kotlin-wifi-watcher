@@ -1,4 +1,4 @@
-package net.kuama.wifiSpy.support
+package net.kuama.wifiMonitor.support
 
 import io.reactivex.Observable
 import kotlinx.coroutines.Dispatchers

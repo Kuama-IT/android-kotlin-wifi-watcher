@@ -1,4 +1,4 @@
-package net.kuama.wifiSpy
+package net.kuama.wifiMonitor
 
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4

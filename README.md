@@ -5,7 +5,7 @@ Allows you to watch for wi-fi changes on an Android device.
 val info = WiFiSpy.with(this).info
 
 subscribe = info.subscribe {
-    println("${it.state.name} - ${it.ssid}")
+    println("${it.state.name} - ${it.ssid} - ${it.bssid}")
 }
 
 ```
@@ -47,3 +47,8 @@ When the phone is not connected to any Wi-Fi.
 
 #### `UNKNOWN`
 When the library could not recognize the Wi-Fi state.
+
+#### Publishing new versions to Bintray
+```bash
+ ./gradlew clean publish bintrayUpload --info
+ ```

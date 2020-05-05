@@ -1,4 +1,4 @@
-package net.kuama.wifiSpy
+package net.kuama.wifiMonitor
 
 internal interface WifiListener {
     fun stop()

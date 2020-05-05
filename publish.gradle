@@ -1,15 +1,15 @@
 apply plugin: 'com.jfrog.bintray'
 
-group 'com.your.awesome.lib'
-version '1.0.0'
+group 'net.kuama.android.wifispy'
+version '1.0.3'
 
 project.ext {
-    mavGitUrl = 'https://github.com/prof18/AwesomeLib.git'
-    mavProjectName = 'AwesomeLib'
-    mavLibraryLicenses = ["Apache-2.0":'http://www.apache.org/licenses/LICENSE-2.0.txt']
-    mavLibraryDescription = "An Awesome Android library"
+    mavGitUrl = 'https://github.com/kuamanet/android-kotlin-wifi-watcher'
+    mavProjectName = 'Android WiFi Spy'
+    mavLibraryLicenses = ["Apache-2.0": 'http://www.apache.org/licenses/LICENSE-2.0.txt']
+    mavLibraryDescription = "An android kotlin rx library to retrieve the current Wi-Fi name and get notified when it changes (or disconnect)"
     mavPublishToMavenLocal = true
-    mavSiteUrl = 'https://github.com/prof18/AwesomeLib'
+    mavSiteUrl = 'https://github.com/kuamanet/android-kotlin-wifi-watcher'
 }
 
 def properties = new Properties()
@@ -18,13 +18,13 @@ properties.load(new FileInputStream("local.properties"))
 bintray {
     user = properties.getProperty("bintray.user")
     key = properties.getProperty("bintray.apikey")
-    publications = ['Production']
+    publications = ['mavenPublish']
     configurations = ['archives']
     override = true
     pkg {
-        repo = 'maven'
-        name = 'Android WiFi Spy'
-        description = "An android kotlin rx library to retrieve the current Wi-Fi name and get notified when it changes (or disconnect)"
+        repo = 'WiFiSpy'
+        name = 'WiFiSpy'
+        description = "An android kotlin rx library to retrieve the current Wi-Fi infos and get notified when it changes (or disconnect)"
         publicDownloadNumbers = true
         licenses = ['Apache-2.0']
         vcsUrl = 'https://github.com/kuamanet/android-kotlin-wifi-watcher'
