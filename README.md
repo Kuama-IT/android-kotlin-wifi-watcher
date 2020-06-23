@@ -1,11 +1,11 @@
-# Wi-Fi Spy
+# WiFiMonitor
 Allows you to watch for wi-fi changes on an Android device.
 
 ```kotlin
-val info = WiFiSpy.with(this).info
+val monitor = WifiMonitor.Builder().context(aContext).build()
 
-subscribe = info.subscribe {
-    println("${it.state.name} - ${it.ssid} - ${it.bssid}")
+subscribe = monitor.info.subscribe {
+    println("${it.state.name} - ${it.ssid} - ${it.bssid} - ${it.rssi}")
 }
 
 ```
