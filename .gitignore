@@ -86,7 +86,3 @@ lint/tmp/
 # lint/reports/
 
 .DS_Store
-
-gradle/
-gradlew
-gradlew.bat
