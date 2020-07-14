@@ -1,7 +1,7 @@
 apply plugin: 'com.jfrog.bintray'
 
 group 'net.kuama.android.wifispy'
-version '1.0.4'
+version '1.0.5'
 
 project.ext {
     mavGitUrl = 'https://github.com/kuamanet/android-kotlin-wifi-watcher'
