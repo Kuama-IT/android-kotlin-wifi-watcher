@@ -47,8 +47,8 @@ internal class AndroidQWifiListener(context: Context) : WifiListener {
             ConnectivityManager.NetworkCallback() {
 
         override fun onCapabilitiesChanged(
-                network: Network,
-                networkCapabilities: NetworkCapabilities
+            network: Network,
+            networkCapabilities: NetworkCapabilities
         ) {
             super.onCapabilitiesChanged(network, networkCapabilities)
             onChange?.invoke()
@@ -59,7 +59,6 @@ internal class AndroidQWifiListener(context: Context) : WifiListener {
         this.onChange = null
         stopImplementation()
     }
-
 
     override fun start(onChange: () -> Unit) {
         this.onChange = onChange

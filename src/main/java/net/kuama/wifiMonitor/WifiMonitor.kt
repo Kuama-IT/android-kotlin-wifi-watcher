@@ -46,7 +46,6 @@ class WifiMonitor private constructor(context: Context) {
     private var wifiManager: WifiManager =
             context.applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
 
-
     private val isFineLocationAccessGranted = ContextCompat.checkSelfPermission(
             context,
             Manifest.permission.ACCESS_FINE_LOCATION
@@ -89,7 +88,6 @@ class WifiMonitor private constructor(context: Context) {
                 }
     }
 
-
     /**
      * Will check the current wifi state and propagate different infos
      * based on it.
@@ -127,7 +125,6 @@ class WifiMonitor private constructor(context: Context) {
         } else {
             WifiNetworkBand.UNKNOWN
         }
-
 
         innerInfo?.current = WiFiInfo(
                 state = if (isFineLocationAccessGranted) WifiState.CONNECTED else WifiState.CONNECTED_MISSING_FINE_LOCATION_PERMISSION,

@@ -16,7 +16,6 @@ class ManifestTest {
             PackageManager.GET_PERMISSIONS
         )
 
-
         Assert.assertEquals(
             packageInfo.requestedPermissions.contains(Manifest.permission.ACCESS_NETWORK_STATE),
             true

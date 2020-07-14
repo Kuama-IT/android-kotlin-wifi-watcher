@@ -9,7 +9,7 @@ subscribe = monitor.info.subscribe {
 }
 
 ```
-don't remember to unsubscribe when you don't need it anymore
+don't forget to unsubscribe when you don't need it anymore
 ```kotlin
 override fun onPause() {
     super.onPause()
@@ -23,7 +23,7 @@ override fun onPause() {
 Sadly yes, to bootstrap the library you will need a valid context:
 
 ```kotlin
-WiFiSpy.with(this) // this is a context (eg. activity)
+WifiMonitor.Builder().context(this).build() // this is a context (eg. activity)
 ```
 
 ### Can I subscribe multiple times?
@@ -47,8 +47,3 @@ When the phone is not connected to any Wi-Fi.
 
 #### `UNKNOWN`
 When the library could not recognize the Wi-Fi state.
-
-#### Publishing new versions to Bintray
-```bash
- ./gradlew clean publish bintrayUpload --info
- ```
