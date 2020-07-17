@@ -13,7 +13,9 @@ internal class HotObservable<T>(anyValue1: T) {
         set(value) {
             if (value != this.current) {
                 field = value
-                emitter.valueChanged(value)
+                if (::emitter.isInitialized) {
+                    emitter.valueChanged(value)
+                }
             }
         }
 
