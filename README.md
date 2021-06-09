@@ -1,34 +1,50 @@
 # WiFiMonitor
+[![](https://jitpack.io/v/Kuama-IT/android-kotlin-wifi-watcher.svg)](https://jitpack.io/#Kuama-IT/android-kotlin-wifi-watcher)
+
 Allows you to watch for wi-fi changes on an Android device.
 
 ```kotlin
-val monitor = WifiMonitor.Builder().context(aContext).build()
-
-subscribe = monitor.info.subscribe {
-    println("${it.state.name} - ${it.ssid} - ${it.bssid} - ${it.rssi}")
+class WiFiViewModel(context: Context) : ViewModel() {
+    val values = WifiLiveData(WifiMonitor(context))
 }
 
-```
-don't forget to unsubscribe when you don't need it anymore
-```kotlin
-override fun onPause() {
-    super.onPause()
-    if (subscribe?.isDisposed == false) {
-        subscribe?.dispose()
+class MainActivity : AppCompatActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
+
+        val viewModel = WiFiViewModel(this)
+
+        viewModel.values.observe(this) {
+            println(it.band)
+            println(it.bssid)
+            println(it.state.name)
+        }
     }
 }
+
 ```
 
 ### Do I need a context?
-Sadly yes, to bootstrap the library you will need a valid context:
+Sadly yes, to bootstrap the library you will need a valid context.
 
-```kotlin
-WifiMonitor.Builder().context(this).build() // this is a context (eg. activity)
+### Installation
+Add the JitPack repository to your build file
 ```
+allprojects {
+    repositories {
+        ...
+        maven { url 'https://jitpack.io' }
+    }
+}
+```
+Add the dependency
 
-### Can I subscribe multiple times?
-Yes, the `info` object is a `ConnectableObservable`
-
+```
+dependencies {
+    implementation 'com.github.Kuama-IT:android-kotlin-wifi-watcher:Tag'
+}
+```
 ### Which states could I get?
 
 #### `CONNECTED`
