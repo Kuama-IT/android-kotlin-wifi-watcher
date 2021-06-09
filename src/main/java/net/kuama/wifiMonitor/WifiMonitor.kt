@@ -7,85 +7,62 @@ import android.net.wifi.WifiManager
 import android.os.Build
 import androidx.core.content.ContextCompat
 import androidx.core.content.PermissionChecker.PERMISSION_GRANTED
-import io.reactivex.Observable
-import kotlinx.coroutines.Deferred
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.async
+import androidx.lifecycle.LiveData
+import kotlinx.coroutines.*
 import net.kuama.wifiMonitor.data.WiFiInfo
-import net.kuama.wifiMonitor.data.WifiState
 import net.kuama.wifiMonitor.data.WifiNetworkBand
+import net.kuama.wifiMonitor.data.WifiState
 import net.kuama.wifiMonitor.implementation.AndroidQWifiListener
 import net.kuama.wifiMonitor.implementation.BeforeAndroidQWifiListener
-import net.kuama.wifiMonitor.support.HotObservable
-import net.kuama.wifiMonitor.support.SingletonHolder
 
-class WifiMonitor private constructor(context: Context) {
+private fun noop() {}
 
-    class Builder {
-        private var context: Context? = null
-        fun context(context: Context) = apply {
-            this.context = context
-        }
+class WifiMonitor(context: Context) {
 
-        fun build(): WifiMonitor {
-            val ctx = context ?: error("please provide a context")
-            return WifiMonitor(ctx)
-        }
+    private val listener = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+        AndroidQWifiListener(context)
+    } else {
+        // on android < 10 we need to take a totally different approach
+        BeforeAndroidQWifiListener(context)
     }
 
-    private var listenWifiChangesAsync: Deferred<Unit>? = null
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
-    private var wifiListener: WifiListener =
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                AndroidQWifiListener(context)
-            } else {
-                // on android < 10 we need to take a totally different approach
-                BeforeAndroidQWifiListener(context)
-            }
+    private val wifiManager: WifiManager =
+        context.applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
 
-    private var wifiManager: WifiManager =
-            context.applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
+    fun stop() = listener.stop()
 
-    private val isFineLocationAccessGranted = ContextCompat.checkSelfPermission(
-            context,
-            Manifest.permission.ACCESS_FINE_LOCATION
+    fun start(onChange: () -> Unit) = scope.launch { listener.start(onChange) }
+
+    val state: Int
+        get() = wifiManager.wifiState
+
+    val connectionInfo: WifiInfo
+        get() = wifiManager.connectionInfo
+
+    val isFineLocationAccessGranted = ContextCompat.checkSelfPermission(
+        context,
+        Manifest.permission.ACCESS_FINE_LOCATION
     ) == PERMISSION_GRANTED
+}
 
-    companion object : SingletonHolder<WifiMonitor, Context>(::WifiMonitor)
+class WifiLiveData constructor(private val monitor: WifiMonitor) :
+    LiveData<WiFiInfo>() {
 
-    private var subscribersCount = 0
+    private var startJob: Job? = null
 
-    private var innerInfo: HotObservable<WiFiInfo>? = null
+    override fun onActive() {
+        super.onActive()
+        startJob = monitor.start(::onWifiChange)
+    }
 
-    /**
-     * Upon subscription will start listening for wifi changes
-     */
-    val info: Observable<WiFiInfo> by lazy {
-        innerInfo =
-                HotObservable(WiFiInfo(WifiState.UNKNOWN))
-        innerInfo!!.observe().doOnSubscribe {
-
-            if (subscribersCount == 0) {
-                listenWifiChangesAsync = GlobalScope.async {
-                    // start listening for wi-fi state changes
-                    listenWiFiChanges()
-                }
-            }
-
-            // keep track of subscribers count
-            subscribersCount += 1
+    override fun onInactive() {
+        super.onInactive()
+        if (startJob?.isActive == true) {
+            startJob?.cancel()
         }
-                .doOnError {
-                    println("error " + it.localizedMessage)
-                    it.printStackTrace()
-                }
-                .doOnDispose {
-                    subscribersCount -= 1
-                    if (subscribersCount == 0) {
-                        stopListeningWiFiChanges()
-                        listenWifiChangesAsync?.cancel()
-                    }
-                }
+        monitor.stop()
     }
 
     /**
@@ -93,9 +70,9 @@ class WifiMonitor private constructor(context: Context) {
      * based on it.
      */
     private fun onWifiChange() {
-        when (wifiManager.wifiState) {
+        when (monitor.state) {
             WifiManager.WIFI_STATE_DISABLED, WifiManager.WIFI_STATE_DISABLING -> onWifiDisabled()
-            WifiManager.WIFI_STATE_ENABLED -> onWifiEnabled(wifiManager.connectionInfo)
+            WifiManager.WIFI_STATE_ENABLED -> onWifiEnabled(monitor.connectionInfo)
             WifiManager.WIFI_STATE_ENABLING -> noop()
             else -> onCouldNotGetWifiState()
         }
@@ -104,10 +81,7 @@ class WifiMonitor private constructor(context: Context) {
     /**
      * Propagates a [WifiState.DISCONNECTED] state
      */
-    private fun onWifiDisabled() {
-        innerInfo?.current =
-                WiFiInfo(WifiState.DISCONNECTED)
-    }
+    private fun onWifiDisabled() = postValue(WiFiInfo(WifiState.DISCONNECTED))
 
     /**
      * Propagates a [WifiState.CONNECTED] state, and the
@@ -126,31 +100,20 @@ class WifiMonitor private constructor(context: Context) {
             WifiNetworkBand.UNKNOWN
         }
 
-        innerInfo?.current = WiFiInfo(
-                state = if (isFineLocationAccessGranted) WifiState.CONNECTED else WifiState.CONNECTED_MISSING_FINE_LOCATION_PERMISSION,
+        postValue(
+            WiFiInfo(
+                state = if (monitor.isFineLocationAccessGranted) WifiState.CONNECTED else WifiState.CONNECTED_MISSING_FINE_LOCATION_PERMISSION,
                 ssid = connectionInfo.ssid,
                 bssid = connectionInfo.bssid,
                 band = band,
                 rssi = connectionInfo.rssi
+            )
         )
     }
 
     /**
      * Propagates a [WifiState.UNKNOWN] state.
-     * Typically it's the first value that gets emitted to the
-     * [info] subscribers
+     * Typically it's the first value that gets emitted to the subscribers
      */
-    private fun onCouldNotGetWifiState() {
-        innerInfo?.current = WiFiInfo(WifiState.UNKNOWN)
-    }
-
-    private fun noop() {}
-
-    private fun listenWiFiChanges() {
-        wifiListener.start { onWifiChange() }
-    }
-
-    private fun stopListeningWiFiChanges() {
-        wifiListener.stop()
-    }
+    private fun onCouldNotGetWifiState() = postValue(WiFiInfo(WifiState.UNKNOWN))
 }

@@ -1,6 +1,6 @@
 package net.kuama.wifiMonitor
 
-internal interface WifiListener {
+interface WifiListener {
     fun stop()
 
     fun start(onChange: () -> Unit)
