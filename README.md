@@ -20,6 +20,19 @@ class MainActivity : AppCompatActivity() {
             println(it.bssid)
             println(it.state.name)
         }
+
+        // Or more simply
+        val monitor = WifiMonitor(context)
+        
+        // currently available information
+        monitor.info
+ 
+        // observe changes
+        lifecycleScope.launchWhenStarted {
+            monitor.observe { freshInfo ->
+                
+            }
+        }
     }
 }
 
