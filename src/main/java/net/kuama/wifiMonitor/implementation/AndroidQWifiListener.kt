@@ -9,7 +9,7 @@ import android.os.Build
 import net.kuama.wifiMonitor.WifiListener
 
 /**
- * From Android Q on, most of the WiFi-related classes and properties have been deprecated
+ * From Android Q on, most of the Wi-Fi-related classes and properties have been deprecated
  * https://developer.android.com/about/versions/10/behavior-changes-10
  *
  * From now on, to observe connectivity changes we should register a
@@ -19,7 +19,7 @@ import net.kuama.wifiMonitor.WifiListener
 internal class AndroidQWifiListener(context: Context) : WifiListener {
 
     /**
-     * Callback to propagate the "wifi state changed" action
+     * Callback to propagate the "Wi-Fi connected" state change
      */
     var onChange: (() -> Unit)? = null
 
@@ -28,7 +28,7 @@ internal class AndroidQWifiListener(context: Context) : WifiListener {
      */
     private val startImplementation = {
         (context.applicationContext.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager)
-                .registerDefaultNetworkCallback(networkCallback)
+            .registerDefaultNetworkCallback(networkCallback)
     }
 
     /**
@@ -36,7 +36,7 @@ internal class AndroidQWifiListener(context: Context) : WifiListener {
      */
     private val stopImplementation = {
         (context.applicationContext.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager)
-                .unregisterNetworkCallback(networkCallback)
+            .unregisterNetworkCallback(networkCallback)
     }
 
     /**
@@ -44,7 +44,7 @@ internal class AndroidQWifiListener(context: Context) : WifiListener {
      * will invoke the onChange on each onCapabilitiesChanged
      */
     private val networkCallback = object :
-            ConnectivityManager.NetworkCallback() {
+        ConnectivityManager.NetworkCallback() {
 
         override fun onCapabilitiesChanged(
             network: Network,
