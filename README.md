@@ -22,17 +22,10 @@ class MainActivity : AppCompatActivity() {
         }
 
         // Or more simply
-        val monitor = WifiMonitor(context)
+        val monitorFlow = WifiMonitor(context).start()
         
-        // currently available information
-        monitor.info
- 
-        // observe changes
-        lifecycleScope.launchWhenStarted {
-            monitor.observe { freshInfo ->
-                
-            }
-        }
+        // last known information
+        monitorFlow.first()
     }
 }
 

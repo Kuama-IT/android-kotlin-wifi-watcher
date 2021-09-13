@@ -9,10 +9,11 @@ class WifiLiveData constructor(private val monitor: WifiMonitor) :
 
     private var startJob: Job? = null
 
+    @ExperimentalCoroutinesApi
     override fun onActive() {
         super.onActive()
         startJob = CoroutineScope(SupervisorJob() + Dispatchers.Default).launch {
-            monitor.observe(::postValue)
+            monitor.start()
         }
     }
 
