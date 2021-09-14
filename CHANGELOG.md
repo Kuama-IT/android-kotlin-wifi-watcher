@@ -1,4 +1,5 @@
 ## Unreleased
+- Expose flow of `WifiStatus`
 
 # Version 1.1.1
 > 2021-06-10
