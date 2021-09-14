@@ -1,5 +1,6 @@
 ## Unreleased
 - Expose flow of `WifiStatus`
+- Kotlin 1.5
 
 # Version 1.1.1
 > 2021-06-10
