@@ -46,8 +46,6 @@ class WifiMonitor(context: Context) {
                 WifiStatus.NetworkBand.WIFI_2_4_GHZ
             }
 
-    private var wifiStatus: WifiStatus = WifiStatus(State.UNKNOWN)
-
     /**
      * True if the user granted access to [Manifest.permission.ACCESS_FINE_LOCATION]
      */
@@ -62,6 +60,7 @@ class WifiMonitor(context: Context) {
      */
     @ExperimentalCoroutinesApi
     suspend fun start(): Flow<WifiStatus> = callbackFlow {
+        var wifiStatus: WifiStatus
         listener.start {
             // Update wifiStatus value accordingly with the new state
             wifiStatus = when (state) {
@@ -83,7 +82,7 @@ class WifiMonitor(context: Context) {
                 // Publish value to the Flow
                 channel.offer(wifiStatus)
             } catch (e: Exception) {
-                Log.d(TAG, "Send channel is closed, it wasn't possible to publish a new value", e)
+                Log.w(TAG, "Send channel is closed, it wasn't possible to publish a new value", e)
             }
         }
         awaitClose {
