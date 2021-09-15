@@ -5,7 +5,6 @@ import android.content.Context
 import android.net.wifi.WifiInfo
 import android.net.wifi.WifiManager
 import android.os.Build
-import android.util.Log
 import androidx.core.content.ContextCompat
 import androidx.core.content.PermissionChecker.PERMISSION_GRANTED
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -18,9 +17,6 @@ import net.kuama.wifiMonitor.implementation.AndroidQWifiListener
 import net.kuama.wifiMonitor.implementation.BeforeAndroidQWifiListener
 
 class WifiMonitor(context: Context) {
-    companion object {
-        private val TAG = WifiMonitor::class.simpleName
-    }
 
     private val listener = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
         AndroidQWifiListener(context)
@@ -77,13 +73,8 @@ class WifiMonitor(context: Context) {
                 WifiManager.WIFI_STATE_ENABLING -> WifiStatus(State.ENABLING)
                 else -> WifiStatus(State.UNKNOWN)
             }
-            // Surrounding with try-catch because the channel may be closed
-            try {
-                // Publish value to the Flow
-                channel.offer(wifiStatus)
-            } catch (e: Exception) {
-                Log.w(TAG, "Send channel is closed, it wasn't possible to publish a new value", e)
-            }
+            channel.trySend(wifiStatus)
+                .isSuccess
         }
         awaitClose {
             wifiStatus = WifiStatus(State.UNKNOWN)
