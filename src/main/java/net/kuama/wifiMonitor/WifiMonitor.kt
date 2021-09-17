@@ -16,17 +16,103 @@ import net.kuama.wifiMonitor.data.WifiStatus.State
 import net.kuama.wifiMonitor.implementation.AndroidQWifiListener
 import net.kuama.wifiMonitor.implementation.BeforeAndroidQWifiListener
 
-class WifiMonitor(context: Context) {
+class PermissionChecker(private val context: Context) {
+    class Builder {
+        private var context: Context? = null
+        fun context(context: Context) =
+            apply {
+                this.context = context
+            }
 
-    private val listener = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-        AndroidQWifiListener(context)
-    } else {
-        // on android < 10 we need to take a totally different approach
-        BeforeAndroidQWifiListener(context)
+        fun build(): PermissionChecker {
+            val context = checkNotNull(context) { "Please provide a valid context" }
+            return PermissionChecker(context)
+        }
     }
 
-    private val wifiManager: WifiManager =
-        context.applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
+    fun check(permission: String): Boolean {
+        return ContextCompat.checkSelfPermission(
+            context,
+            permission,
+        ) == PERMISSION_GRANTED
+    }
+}
+
+class WifiMonitor private constructor(
+    private val listener: WifiListener,
+    private val wifiManager: WifiManager,
+    permissionChecker: PermissionChecker
+) {
+
+    class WifiMonitorBuilder {
+
+        private var listener: WifiListener? = null
+        fun listener(listener: WifiListener) =
+            apply {
+                this.listener = listener
+            }
+
+        private fun listenerBuilder(context: Context): WifiListener {
+            return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                AndroidQWifiListener(context)
+            } else {
+                // on android < 10 we need to take a totally different approach
+                BeforeAndroidQWifiListener(context)
+            }
+        }
+
+        private var wifiManager: WifiManager? = null
+        fun wifiManager(wifiManager: WifiManager) = apply {
+            this.wifiManager = wifiManager
+        }
+
+        private fun wifiManagerBuilder(context: Context): WifiManager {
+            return context.applicationContext
+                .getSystemService(Context.WIFI_SERVICE) as WifiManager
+        }
+
+        private var permissionChecker: PermissionChecker? = null
+        fun permissionChecker(permissionChecker: PermissionChecker) = apply {
+            this.permissionChecker = permissionChecker
+        }
+
+        private fun permissionCheckerBuilder(context: Context): PermissionChecker {
+            return PermissionChecker.Builder()
+                .context(context)
+                .build()
+        }
+
+        private var context: Context? = null
+        fun context(context: Context) =
+            apply {
+                this.context = context
+            }
+
+        fun build(): WifiMonitor {
+            val context = checkNotNull(context) { "Please provide a valid context" }
+            val listener = if (listener == null) {
+                listenerBuilder(context)
+            } else {
+                this.listener!!
+            }
+            val wifiManager = if (wifiManager == null) {
+                wifiManagerBuilder(context)
+            } else {
+                this.wifiManager!!
+            }
+            val permissionChecker = if (permissionChecker == null) {
+                permissionCheckerBuilder(context)
+            } else {
+                this.permissionChecker!!
+            }
+
+            return WifiMonitor(
+                listener,
+                wifiManager,
+                permissionChecker,
+            )
+        }
+    }
 
     private val state: Int
         get() = wifiManager.wifiState
@@ -45,10 +131,8 @@ class WifiMonitor(context: Context) {
     /**
      * True if the user granted access to [Manifest.permission.ACCESS_FINE_LOCATION]
      */
-    val isFineLocationAccessGranted: Boolean = ContextCompat.checkSelfPermission(
-        context,
-        Manifest.permission.ACCESS_FINE_LOCATION
-    ) == PERMISSION_GRANTED
+    private val isFineLocationAccessGranted: Boolean =
+        permissionChecker.check(Manifest.permission.ACCESS_FINE_LOCATION)
 
     /**
      * Start listening to Wi-fi changes exposing a flow of WifiStatus.
