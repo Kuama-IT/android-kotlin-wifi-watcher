@@ -74,7 +74,6 @@ class WifiMonitor(context: Context) {
                 else -> WifiStatus(State.UNKNOWN)
             }
             channel.trySend(wifiStatus)
-                .isSuccess
         }
         awaitClose {
             wifiStatus = WifiStatus(State.UNKNOWN)
