@@ -16,6 +16,9 @@ import net.kuama.wifiMonitor.data.WifiStatus.State
 import net.kuama.wifiMonitor.implementation.AndroidQWifiListener
 import net.kuama.wifiMonitor.implementation.BeforeAndroidQWifiListener
 
+/**
+ * This class allows to check if any permission from the manifest has been granted
+ */
 class PermissionChecker(private val context: Context) {
     class Builder {
         private var context: Context? = null
@@ -30,10 +33,14 @@ class PermissionChecker(private val context: Context) {
         }
     }
 
+    /**
+     * Passing a permission, it checks if the user granted.
+     * The permission must be in Manifest.permission.PERMISSION_NAME form
+     */
     fun check(permission: String): Boolean {
         return ContextCompat.checkSelfPermission(
             context,
-            permission,
+            permission
         ) == PERMISSION_GRANTED
     }
 }
@@ -44,6 +51,12 @@ class WifiMonitor private constructor(
     permissionChecker: PermissionChecker
 ) {
 
+    /**
+     * In order to be able to build a WifiMonitor instance, it is necessary to pass either:
+     * - a valid context
+     * or
+     * - a WifiListener, WifiManager and a PermissionChecker
+     */
     class WifiMonitorBuilder {
 
         private var listener: WifiListener? = null
@@ -89,28 +102,42 @@ class WifiMonitor private constructor(
             }
 
         fun build(): WifiMonitor {
-            val context = checkNotNull(context) { "Please provide a valid context" }
-            val listener = if (listener == null) {
-                listenerBuilder(context)
+            if (context == null) {
+                // If we don't have a context, make sure we have all params to build a valid wifi monitor
+                val listener = checkNotNull(listener) { "Please provide a valid wi-fi listener" }
+                val wifiManager =
+                    checkNotNull(wifiManager) { "Please provide a valid wi-fi manager" }
+                val permissionChecker =
+                    checkNotNull(permissionChecker) { "Please provide a valid permission checker" }
+                return WifiMonitor(
+                    listener,
+                    wifiManager,
+                    permissionChecker
+                )
             } else {
-                this.listener!!
+                // If we have a context, build all the missing params in order to have a wifi monitor
+                val context = checkNotNull(context) { "Please provide a valid context" }
+                val listener = if (listener == null) {
+                    listenerBuilder(context)
+                } else {
+                    this.listener!!
+                }
+                val wifiManager = if (wifiManager == null) {
+                    wifiManagerBuilder(context)
+                } else {
+                    this.wifiManager!!
+                }
+                val permissionChecker = if (permissionChecker == null) {
+                    permissionCheckerBuilder(context)
+                } else {
+                    this.permissionChecker!!
+                }
+                return WifiMonitor(
+                    listener,
+                    wifiManager,
+                    permissionChecker
+                )
             }
-            val wifiManager = if (wifiManager == null) {
-                wifiManagerBuilder(context)
-            } else {
-                this.wifiManager!!
-            }
-            val permissionChecker = if (permissionChecker == null) {
-                permissionCheckerBuilder(context)
-            } else {
-                this.permissionChecker!!
-            }
-
-            return WifiMonitor(
-                listener,
-                wifiManager,
-                permissionChecker,
-            )
         }
     }
 

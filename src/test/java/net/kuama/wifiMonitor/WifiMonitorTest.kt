@@ -14,10 +14,23 @@ import org.junit.Test
 class WifiMonitorTest {
 
     @Test(expected = IllegalStateException::class)
-    fun `it throws an IllegalStateException if WifiListenerBuilder is built without all parameters`() {
+    fun `it throws an IllegalStateException if WifiMonitorBuilder is built without all parameters`() {
         // Arrange
         // Act
         WifiMonitor.WifiMonitorBuilder().build()
+        // Assert
+    }
+
+    @Test(expected = java.lang.IllegalStateException::class)
+    fun `it throws an IllegalStateException if WifiMonitorBuilder has a WifiLister and PermissionChecker but not a valid context`() {
+        // Arrange
+        val wifiListener = mockk<WifiListener>(relaxed = true)
+        val permissionChecker = mockk<PermissionChecker>(relaxed = true)
+        // Act
+        WifiMonitor.WifiMonitorBuilder()
+            .listener(wifiListener)
+            .permissionChecker(permissionChecker)
+            .build()
         // Assert
     }
 
