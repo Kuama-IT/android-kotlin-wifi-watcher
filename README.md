@@ -5,7 +5,11 @@ Allows you to watch for wi-fi changes on an Android device.
 
 ```kotlin
 class WiFiViewModel(context: Context) : ViewModel() {
-    val values = WifiLiveData(WifiMonitor(context))
+    val values = WifiLiveData(
+        WifiMonitor.WifiMonitorBuilder()
+        .context(context)
+            .build()
+    )
 }
 
 class MainActivity : AppCompatActivity() {
@@ -22,7 +26,18 @@ class MainActivity : AppCompatActivity() {
         }
 
         // Or more simply
-        val monitorFlow = WifiMonitor(context).start()
+        val monitorFlow = WifiMonitor.WifiMonitorBuilder()
+            .context(context)
+            .build()
+            .start()
+        
+        // Or without passing the context
+        val monitorFlow = WifiMonitor.WifiMonitorBuilder()
+            .listener(wifiListener)
+            .wifiManager(wifiManager)
+            .permissionChecker(permissionChecker)
+            .build()
+            .start()
         
         // last known information
         monitorFlow.first()
