@@ -2,8 +2,10 @@ package net.kuama.wifiMonitor
 
 import androidx.lifecycle.LiveData
 import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.collect
 import net.kuama.wifiMonitor.data.WifiStatus
 
+@ExperimentalCoroutinesApi
 class WifiLiveData constructor(private val monitor: WifiMonitor) :
     LiveData<WifiStatus>() {
 
@@ -12,7 +14,9 @@ class WifiLiveData constructor(private val monitor: WifiMonitor) :
     override fun onActive() {
         super.onActive()
         startJob = CoroutineScope(SupervisorJob() + Dispatchers.Default).launch {
-            monitor.observe(::postValue)
+            monitor.start().collect { wifiStatus ->
+                postValue(wifiStatus)
+            }
         }
     }
 
