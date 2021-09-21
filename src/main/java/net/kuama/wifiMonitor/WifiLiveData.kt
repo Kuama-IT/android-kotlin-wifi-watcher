@@ -14,7 +14,7 @@ class WifiLiveData constructor(private val monitor: WifiMonitor) :
     override fun onActive() {
         super.onActive()
         startJob = CoroutineScope(SupervisorJob() + Dispatchers.Default).launch {
-            monitor.start().collect { wifiStatus ->
+            monitor.monitor().collect { wifiStatus ->
                 postValue(wifiStatus)
             }
         }
@@ -25,6 +25,5 @@ class WifiLiveData constructor(private val monitor: WifiMonitor) :
         if (startJob?.isActive == true) {
             startJob?.cancel()
         }
-        monitor.stop()
     }
 }

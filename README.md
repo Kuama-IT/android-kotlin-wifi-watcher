@@ -29,7 +29,7 @@ class MainActivity : AppCompatActivity() {
         val monitorFlow = WifiMonitor.WifiMonitorBuilder()
             .context(context)
             .build()
-            .start()
+            .monitor()
         
         // Or without passing the context
         val monitorFlow = WifiMonitor.WifiMonitorBuilder()
@@ -37,7 +37,7 @@ class MainActivity : AppCompatActivity() {
             .wifiManager(wifiManager)
             .permissionChecker(permissionChecker)
             .build()
-            .start()
+            .monitor()
         
         // last known information
         monitorFlow.first()
