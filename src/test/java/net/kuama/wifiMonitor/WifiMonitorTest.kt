@@ -63,7 +63,7 @@ class WifiMonitorTest {
             }
 
             // Act
-            val callbackFlow = wifiMonitor.start()
+            val callbackFlow = wifiMonitor.monitor()
             // Assert
             assert(callbackFlow.first() == WifiStatus(WifiStatus.State.DISCONNECTED)) {
                 callbackFlow.first().state.name

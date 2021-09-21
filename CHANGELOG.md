@@ -1,3 +1,7 @@
+## Unreleased
+- Changed WifiMonitor.start to monitor
+- Removed stop method
+
 # Version 1.2.0
 - Expose flow of `WifiStatus`
 - Kotlin 1.5
