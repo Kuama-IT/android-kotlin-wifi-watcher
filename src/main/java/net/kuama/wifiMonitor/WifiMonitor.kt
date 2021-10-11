@@ -166,7 +166,7 @@ class WifiMonitor private constructor(
      * It can throw an exception when the channel publishing on a channel that is closed
      */
     @ExperimentalCoroutinesApi
-    suspend fun start(): Flow<WifiStatus> = callbackFlow {
+    suspend fun monitor(): Flow<WifiStatus> = callbackFlow {
         var wifiStatus: WifiStatus
         listener.start {
             // Update wifiStatus value accordingly with the new state
@@ -188,12 +188,6 @@ class WifiMonitor private constructor(
         }
         awaitClose {
             wifiStatus = WifiStatus(State.UNKNOWN)
-            stop()
         }
     }
-
-    /**
-     * Stop listening to Wi-Fi changes
-     */
-    fun stop() = listener.stop()
 }
