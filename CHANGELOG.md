@@ -1,4 +1,4 @@
-## Unreleased
+# Version 1.2.1
 - Changed WifiMonitor.start to monitor
 - Removed stop method
 
