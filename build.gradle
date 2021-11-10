@@ -1,30 +1,29 @@
-
 buildscript {
-    ext.kotlin_version = "1.5.30"
+    ext.kotlin_version = "1.5.31"
     repositories {
         google()
         mavenCentral()
-    dependencies {
-        classpath "com.android.tools.build:gradle:4.2.2"
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-        classpath "com.diffplug.spotless:spotless-plugin-gradle:5.12.5"
+        dependencies {
+            classpath "com.android.tools.build:gradle:7.0.3"
+            classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+            classpath "com.diffplug.spotless:spotless-plugin-gradle:5.17.1"
+        }
     }
-}
 
-allprojects {
-    repositories {
-        google()
-        mavenCentral()
-        maven { url "https://jitpack.io" }
-    }
+    allprojects {
+        repositories {
+            google()
+            mavenCentral()
+            maven { url "https://jitpack.io" }
+        }
     }
 
     ext {
-        artifactId = 'wifi-watcher'
-        groupId = 'net.kuama.android'
-        compile_sdk_version = 30
+        artifactId = "wifi-watcher"
+        groupId = "net.kuama.android"
+        compile_sdk_version = 31
         min_sdk_version = 21
-        target_sdk_version = 30
+        target_sdk_version = 31
         version_code = project.property("version_code").toInteger()
         version_name = project.property("version_name") as String
     }
@@ -36,9 +35,8 @@ apply plugin: "maven-publish"
 apply plugin: "com.diffplug.spotless"
 
 android {
-    compileSdkVersion 30
+    compileSdkVersion rootProject.ext.compile_sdk_version
     buildToolsVersion "30.0.3"
-
 
     defaultConfig {
         minSdkVersion rootProject.ext.min_sdk_version
@@ -60,41 +58,39 @@ android {
     testOptions {
         unitTests.returnDefaultValues = true
     }
-
 }
 
 dependencies {
     implementation fileTree(dir: "libs", include: ["*.jar"])
-    implementation "androidx.core:core-ktx:1.6.0"
-    implementation "androidx.lifecycle:lifecycle-livedata-ktx:2.3.1"
+    implementation "androidx.core:core-ktx:1.7.0"
+    implementation "androidx.lifecycle:lifecycle-livedata-ktx:2.4.0"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.2"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.5.2"
 
-    testImplementation 'org.jetbrains.kotlinx:kotlinx-coroutines-test:1.5.1'
+    testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:1.5.2"
     testImplementation "junit:junit:4.13.2"
     testImplementation "io.mockk:mockk:1.12.0"
     androidTestImplementation "androidx.test.ext:junit:1.1.3"
     androidTestImplementation "androidx.test.espresso:espresso-core:3.4.0"
 }
 
-
 spotless {
     kotlin {
         target "**/*.kt"
         // EditorConfig support is broken: https://github.com/diffplug/spotless/issues/142
-        ktlint("0.35.0").userData(["disabled_rules": "no-wildcard-imports,import-ordering,chain-wrapping"])
+        ktlint("0.41.0").userData(["disabled_rules": "no-wildcard-imports,import-ordering,chain-wrapping"])
     }
 }
 
 task sourceJar(type: Jar) {
     from android.sourceSets.main.kotlin.srcDirs
     from android.sourceSets.main.java.srcDirs
-    from fileTree(dir: 'src/libs', include: ['*.jar'])
+    from fileTree(dir: "src/libs", include: ["*.jar"])
     classifier "sources"
 }
 
 task androidSourcesJar(type: Jar) {
-    archiveClassifier.set('sources')
+    archiveClassifier.set("sources")
     from android.sourceSets.main.java.srcDirs
 }
 
