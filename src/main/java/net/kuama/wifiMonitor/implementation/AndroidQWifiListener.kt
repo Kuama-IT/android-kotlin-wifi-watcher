@@ -6,62 +6,41 @@ import android.net.ConnectivityManager
 import android.net.Network
 import android.net.NetworkCapabilities
 import android.os.Build
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.channels.trySendBlocking
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
 import net.kuama.wifiMonitor.WifiListener
 
 /**
- * From Android Q on, most of the Wi-Fi-related classes and properties have been deprecated
+ * WiFi Listener for Android SDK 29 (Android 10) and above.
+ *
+ * From Android Q on, most of the Wi-Fi-related classes and properties have been deprecated.
  * https://developer.android.com/about/versions/10/behavior-changes-10
  *
- * From now on, to observe connectivity changes we should register a
- * [ConnectivityManager.NetworkCallback] implementation
+ * From now on, to observe connectivity changes we should register a [ConnectivityManager.NetworkCallback] implementation.
  */
-@TargetApi(Build.VERSION_CODES.N)
-internal class AndroidQWifiListener(context: Context) : WifiListener {
-
-    /**
-     * Callback to propagate the "Wi-Fi connected" state change
-     */
-    var onChange: (() -> Unit)? = null
-
-    /**
-     * Registers the network callback
-     */
-    private val startImplementation = {
-        (context.applicationContext.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager)
-            .registerDefaultNetworkCallback(networkCallback)
-    }
-
-    /**
-     * Unregisters the network callback
-     */
-    private val stopImplementation = {
-        (context.applicationContext.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager)
-            .unregisterNetworkCallback(networkCallback)
-    }
-
-    /**
-     * Simple [ConnectivityManager.NetworkCallback] implementation
-     * will invoke the onChange on each onCapabilitiesChanged
-     */
-    private val networkCallback = object :
-        ConnectivityManager.NetworkCallback() {
-
-        override fun onCapabilitiesChanged(
-            network: Network,
-            networkCapabilities: NetworkCapabilities
-        ) {
-            super.onCapabilitiesChanged(network, networkCapabilities)
-            onChange?.invoke()
+@TargetApi(Build.VERSION_CODES.Q)
+internal class AndroidQWifiListener : WifiListener {
+    @OptIn(ExperimentalCoroutinesApi::class)
+    override fun listen(context: Context): Flow<Unit> = callbackFlow {
+        val callback = object : ConnectivityManager.NetworkCallback() {
+            override fun onCapabilitiesChanged(network: Network, networkCapabilities: NetworkCapabilities) {
+                super.onCapabilitiesChanged(network, networkCapabilities)
+                @Suppress("BlockingMethodInNonBlockingContext")
+                trySendBlocking(Unit)
+            }
         }
-    }
 
-    override fun stop() {
-        this.onChange = null
-        stopImplementation()
-    }
+        val connectivityManager = context.applicationContext.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
 
-    override fun start(onChange: () -> Unit) {
-        this.onChange = onChange
-        startImplementation()
+        // Register the callback on network changes.
+        connectivityManager.registerDefaultNetworkCallback(callback)
+
+        // Wait for flow cancellation, then unregister the callback.
+        awaitClose {
+            connectivityManager.unregisterNetworkCallback(callback)
+        }
     }
 }

@@ -48,6 +48,11 @@ android {
         consumerProguardFiles "consumer-rules.pro"
     }
 
+    kotlinOptions {
+        allWarningsAsErrors = true
+        freeCompilerArgs += ["-Xopt-in=kotlin.RequiresOptIn"]
+    }
+
     buildTypes {
         release {
             minifyEnabled false

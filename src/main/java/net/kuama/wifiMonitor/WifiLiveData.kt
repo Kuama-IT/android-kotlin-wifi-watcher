@@ -5,10 +5,8 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.collect
 import net.kuama.wifiMonitor.data.WifiStatus
 
-@ExperimentalCoroutinesApi
-class WifiLiveData constructor(private val monitor: WifiMonitor) :
-    LiveData<WifiStatus>() {
-
+@OptIn(ExperimentalCoroutinesApi::class)
+class WifiLiveData constructor(private val monitor: WifiMonitor) : LiveData<WifiStatus>() {
     private var startJob: Job? = null
 
     override fun onActive() {
