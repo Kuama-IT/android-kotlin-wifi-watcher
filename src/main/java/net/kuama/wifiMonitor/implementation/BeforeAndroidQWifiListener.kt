@@ -4,55 +4,37 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.channels.trySendBlocking
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
 import net.kuama.wifiMonitor.WifiListener
 
 /**
- * Before Android Q we can register a receiver to obser wifi state changes,
- * and this class does just that.
+ * WiFi Listener for Android SDK 28 (Android 9) and below.
+ *
+ * Before Android Q we can register an intent receiver to observe wifi state changes.
  */
-internal class BeforeAndroidQWifiListener(context: Context) : WifiListener {
-
-    /**
-     * Callback to propagate the "wifi state changed" action
-     */
-    var onChange: (() -> Unit)? = null
-
-    /**
-     * Dummy receiver, it will just trigger the callback when the onReceive method
-     * gets called
-     */
-    private var receiver: BroadcastReceiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context?, intent: Intent?) {
-            onChange?.invoke()
+internal class BeforeAndroidQWifiListener : WifiListener {
+    @OptIn(ExperimentalCoroutinesApi::class)
+    override fun listen(context: Context): Flow<Unit> = callbackFlow {
+        val receiver = object : BroadcastReceiver() {
+            override fun onReceive(context: Context?, intent: Intent?) {
+                @Suppress("BlockingMethodInNonBlockingContext")
+                trySendBlocking(Unit)
+            }
         }
-    }
 
-    /**
-     * unregisters the receiver
-     */
-    private val stopImplementation = {
-        context.unregisterReceiver(receiver)
-    }
-
-    /**
-     * Registers a receiver for the actions:
-     * - android.net.wifi.WIFI_STATE_CHANGED
-     * - android.net.wifi.STATE_CHANGE
-     */
-    private val startImplementation = {
+        // Register the intent receiver for network state change.
         val filter = IntentFilter()
         filter.addAction("android.net.wifi.WIFI_STATE_CHANGED")
         filter.addAction("android.net.wifi.STATE_CHANGE")
         context.registerReceiver(receiver, filter)
-    }
 
-    override fun stop() {
-        this.onChange = null
-        stopImplementation()
-    }
-
-    override fun start(onChange: () -> Unit) {
-        this.onChange = onChange
-        startImplementation()
+        // Wait for flow cancellation, then unregister the receiver.
+        awaitClose {
+            context.unregisterReceiver(receiver)
+        }
     }
 }
