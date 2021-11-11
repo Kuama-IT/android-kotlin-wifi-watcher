@@ -4,45 +4,15 @@
 Allows you to watch for wi-fi changes on an Android device.
 
 ```kotlin
-class WiFiViewModel(context: Context) : ViewModel() {
-    val values = WifiLiveData(
-        WifiMonitor.WifiMonitorBuilder()
-        .context(context)
-            .build()
-    )
-}
+val wifiMonitor = WifiMonitor.Builder()
+    .listener(wifiListener)
+    .wifiManager(wifiManager)
+    .permissionChecker(permissionChecker)
+    .build(context)
 
-class MainActivity : AppCompatActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+val callbackFlow = wifiMonitor.monitor()
 
-        val viewModel = WiFiViewModel(this)
-
-        viewModel.values.observe(this) {
-            println(it.band)
-            println(it.bssid)
-            println(it.state.name)
-        }
-
-        // Or more simply
-        val monitorFlow = WifiMonitor.WifiMonitorBuilder()
-            .context(context)
-            .build()
-            .monitor()
-        
-        // Or without passing the context
-        val monitorFlow = WifiMonitor.WifiMonitorBuilder()
-            .listener(wifiListener)
-            .wifiManager(wifiManager)
-            .permissionChecker(permissionChecker)
-            .build()
-            .monitor()
-        
-        // last known information
-        monitorFlow.first()
-    }
-}
+// use the flow as you like
 
 ```
 
