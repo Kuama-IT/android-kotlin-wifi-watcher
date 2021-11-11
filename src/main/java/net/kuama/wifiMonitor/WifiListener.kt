@@ -1,10 +1,11 @@
 package net.kuama.wifiMonitor
 
+import android.content.Context
+import kotlinx.coroutines.flow.Flow
+
 /**
- * Allows to trigger a callback whenever Wi-Fi changes its status
+ * Interface for a platform-specific WiFi monitoring implementation.
  */
 interface WifiListener {
-    fun stop()
-
-    fun start(onChange: () -> Unit)
+    fun listen(context: Context): Flow<Unit>
 }

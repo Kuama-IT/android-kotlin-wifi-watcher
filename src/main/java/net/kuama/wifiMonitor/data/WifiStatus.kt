@@ -6,7 +6,7 @@ import net.kuama.wifiMonitor.WifiMonitor
 /**
  * Collects a set of useful properties about the WiFi
  */
-class WifiStatus(
+data class WifiStatus(
     /**
      * Connection state
      */
