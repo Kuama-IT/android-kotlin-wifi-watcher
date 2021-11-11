@@ -1,4 +1,9 @@
 # Version 1.2.1
+> 2021-11-11
+- Refactor to use Kotlin Flows since listeners
+- Jitpack: use java 11  
+
+# Version 1.2.1
 - Changed WifiMonitor.start to monitor
 - Removed stop method
 
