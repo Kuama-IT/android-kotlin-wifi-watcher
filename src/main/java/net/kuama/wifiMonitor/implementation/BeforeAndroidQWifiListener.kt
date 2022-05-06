@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.net.wifi.WifiInfo
+import android.net.wifi.WifiManager
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.channels.trySendBlocking
@@ -17,13 +18,13 @@ import net.kuama.wifiMonitor.WifiListener
  *
  * Before Android Q we can register an intent receiver to observe wifi state changes.
  */
-internal class BeforeAndroidQWifiListener : WifiListener {
+internal class BeforeAndroidQWifiListener(private val wifiManager: WifiManager) : WifiListener {
     @OptIn(ExperimentalCoroutinesApi::class)
     override fun listen(context: Context): Flow<WifiInfo?> = callbackFlow {
         val receiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context?, intent: Intent?) {
-                @Suppress("BlockingMethodInNonBlockingContext")
-                trySendBlocking(null)
+                @Suppress("DEPRECATION")
+                trySendBlocking(if (wifiManager.wifiState == WifiManager.WIFI_STATE_ENABLED) wifiManager.connectionInfo else null)
             }
         }
 
