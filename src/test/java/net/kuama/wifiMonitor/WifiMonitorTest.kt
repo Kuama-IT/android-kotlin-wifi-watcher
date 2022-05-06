@@ -33,7 +33,7 @@ class WifiMonitorTest {
             every {
                 wifiListener.listen(context)
             } answers {
-                flowOf(Unit)
+                flowOf(null)
             }
 
             // Act

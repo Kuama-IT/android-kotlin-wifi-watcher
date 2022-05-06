@@ -56,15 +56,13 @@ class WifiMonitor private constructor(
      *
      * @return A flow of WiFi statuses.
      */
-    fun monitor(): Flow<WifiStatus> = listener.listen(context).map {
+    fun monitor(): Flow<WifiStatus> = listener.listen(context).map { wifiInfo ->
         when (wifiManager.wifiState) {
             WifiManager.WIFI_STATE_DISABLED, WifiManager.WIFI_STATE_DISABLING -> WifiStatus(
                 State.DISCONNECTED
             )
             WifiManager.WIFI_STATE_ENABLED -> {
-                // TODO: WiFiManager.getConnectionInfo() is deprecated in Android SDK 31 (Android 12).
-                val connectionInfo = @Suppress("DEPRECATION") wifiManager.connectionInfo
-
+                val connectionInfo = wifiInfo ?: @Suppress("DEPRECATION") wifiManager.connectionInfo
                 WifiStatus(
                     state = if (isFineLocationAccessGranted) State.CONNECTED else State.CONNECTED_MISSING_FINE_LOCATION_PERMISSION,
                     ssid = connectionInfo.ssid,
