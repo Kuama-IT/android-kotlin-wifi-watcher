@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.net.wifi.WifiInfo
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.channels.trySendBlocking
@@ -18,11 +19,11 @@ import net.kuama.wifiMonitor.WifiListener
  */
 internal class BeforeAndroidQWifiListener : WifiListener {
     @OptIn(ExperimentalCoroutinesApi::class)
-    override fun listen(context: Context): Flow<Unit> = callbackFlow {
+    override fun listen(context: Context): Flow<WifiInfo?> = callbackFlow {
         val receiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context?, intent: Intent?) {
                 @Suppress("BlockingMethodInNonBlockingContext")
-                trySendBlocking(Unit)
+                trySendBlocking(null)
             }
         }
 
