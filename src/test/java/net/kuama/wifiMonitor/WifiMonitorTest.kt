@@ -7,7 +7,7 @@ import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.runTest
 import net.kuama.wifiMonitor.data.WifiStatus
 import org.junit.Test
 
@@ -15,7 +15,7 @@ import org.junit.Test
 class WifiMonitorTest {
     @Test
     fun `it sends a wifi status disconnected in the flow when wifi manager is receiving a disabled state`() =
-        runBlockingTest {
+        runTest {
             // Arrange
             val context = mockk<Context>(relaxed = true)
             val wifiManager = mockk<WifiManager>(relaxed = true)

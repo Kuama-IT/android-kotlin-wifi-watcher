@@ -21,11 +21,11 @@ class WifiMonitor private constructor(
         private var listener: WifiListener? = null
         fun listener(listener: WifiListener) = apply { this.listener = listener }
 
-        private fun listenerBuilder(): WifiListener =
+        private fun listenerBuilder(wifiManager: WifiManager): WifiListener =
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                AndroidQWifiListener()
+                AndroidQWifiListener(wifiManager)
             } else {
-                BeforeAndroidQWifiListener()
+                BeforeAndroidQWifiListener(wifiManager)
             }
 
         private var wifiManager: WifiManager? = null
@@ -38,12 +38,15 @@ class WifiMonitor private constructor(
 
         private fun permissionCheckerBuilder(context: Context): PermissionChecker = PermissionChecker.Builder().context(context).build()
 
-        fun build(context: Context): WifiMonitor = WifiMonitor(
-            context = context,
-            listener = listener ?: listenerBuilder(),
-            wifiManager = wifiManager ?: wifiManagerBuilder(context),
-            permissionChecker = permissionChecker ?: permissionCheckerBuilder(context),
-        )
+        fun build(context: Context): WifiMonitor {
+            val wifiManager = wifiManager ?: wifiManagerBuilder(context)
+            return WifiMonitor(
+                context = context,
+                listener = listener ?: listenerBuilder(wifiManager),
+                wifiManager = wifiManager,
+                permissionChecker = permissionChecker ?: permissionCheckerBuilder(context),
+            )
+        }
     }
 
     /**
@@ -62,7 +65,8 @@ class WifiMonitor private constructor(
                 State.DISCONNECTED
             )
             WifiManager.WIFI_STATE_ENABLED -> {
-                val connectionInfo = wifiInfo ?: @Suppress("DEPRECATION") wifiManager.connectionInfo
+                val connectionInfo = wifiInfo ?: return@map WifiStatus(State.UNKNOWN)
+
                 WifiStatus(
                     state = if (isFineLocationAccessGranted) State.CONNECTED else State.CONNECTED_MISSING_FINE_LOCATION_PERMISSION,
                     ssid = connectionInfo.ssid,
